@@ -1,0 +1,15 @@
+BasedOnStyle: Google
+IndentWidth: 2
+ColumnLimit: 130
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: 'true'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakBeforeTernaryOperators: 'false'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+InsertNewlineAtEOF: 'true'
