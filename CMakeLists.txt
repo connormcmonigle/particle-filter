@@ -1,5 +1,7 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.24)
 project (particle_filter LANGUAGES CXX CUDA)
+
+find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 
 include (GNUInstallDirs)
 
@@ -20,9 +22,10 @@ pybind11_add_module (
 )
 
 target_compile_features (particle_filter PRIVATE cxx_std_17)
-target_include_directories (particle_filter PRIVATE include eigen)
 
-set_target_properties(particle_filter PROPERTIES CUDA_ARCHITECTURES "75")
+target_include_directories (particle_filter PRIVATE include eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+set_target_properties(particle_filter PROPERTIES CUDA_ARCHITECTURES native)
 target_compile_options(particle_filter PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
                        --expt-relaxed-constexpr
                        --extended-lambda

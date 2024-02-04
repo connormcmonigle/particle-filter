@@ -128,10 +128,10 @@ class systematic_resampler {
         thrust::make_zip_iterator(input_index_iterator + number_of_particles_ + one, particles.cend()),
         thrust::make_transform_iterator(
             particle_scatter_indices_.cbegin(),
-            [] __device__(const truncated_representation_type& index) { return index.integral_component(); }),
+            [] __host__ __device__(const truncated_representation_type& index) { return index.integral_component(); }),
         thrust::make_zip_iterator(particle_scatter_indices_.cbegin(), std::next(particle_scatter_indices_.cbegin())),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
-        [] __device__(const thrust::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
+        [] __host__ __device__(const thrust::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
           return tuple.template get<1>().integral_component() > tuple.template get<0>().integral_component();
         });
 
@@ -140,7 +140,7 @@ class systematic_resampler {
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
         thrust::make_zip_iterator(temp_particle_indices_.end(), temp_particles_.end()),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
-        [] __device__(const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
+        [] __host__ __device__(const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
           return (a.template get<0>() > b.template get<0>()) ? a : b;
         });
 
