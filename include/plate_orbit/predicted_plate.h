@@ -12,12 +12,12 @@ class predicted_plate {
   Eigen::Vector3f velocity_;
 
  public:
-  __host__ __device__ [[nodiscard]] const Eigen::Vector3f& position() const noexcept { return position_; }
-  __host__ __device__ [[nodiscard]] const Eigen::Vector3f& velocity() const noexcept { return velocity_; }
+   [[nodiscard]] const Eigen::Vector3f& position() const noexcept { return position_; }
+   [[nodiscard]] const Eigen::Vector3f& velocity() const noexcept { return velocity_; }
 
-  __host__ __device__ predicted_plate() noexcept : position_{Eigen::Vector3f::Zero()}, velocity_{Eigen::Vector3f::Zero()} {}
+   predicted_plate() noexcept : position_{Eigen::Vector3f::Zero()}, velocity_{Eigen::Vector3f::Zero()} {}
 
-  __host__ __device__ predicted_plate(const Eigen::Vector3f& position, const Eigen::Vector3f& velocity) noexcept
+   predicted_plate(const Eigen::Vector3f& position, const Eigen::Vector3f& velocity) noexcept
       : position_{position}, velocity_{velocity} {}
 };
 

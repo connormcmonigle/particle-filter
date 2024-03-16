@@ -46,7 +46,7 @@ class prediction {
     return predicted_plates().to_host_array();
   }
 
-  __host__ __device__ [[nodiscard]] util::device_array<predicted_plate, number_of_plates> predicted_plates() const noexcept {
+   [[nodiscard]] util::device_array<predicted_plate, number_of_plates> predicted_plates() const noexcept {
     const util::device_array<angle_offset_and_radius, number_of_plates> angle_offsets_and_radii = {
         angle_offset_and_radius{0.0, radius_0_},
         angle_offset_and_radius{M_PI_2, radius_1_},
@@ -68,7 +68,7 @@ class prediction {
     });
   }
 
-  __host__ __device__ [[nodiscard]] prediction extrapolate_state(const float& time_offset_seconds) const noexcept {
+   [[nodiscard]] prediction extrapolate_state(const float& time_offset_seconds) const noexcept {
     return prediction(
         radius_0_,
         radius_1_,
@@ -78,7 +78,7 @@ class prediction {
         center_velocity_);
   }
 
-  __host__ __device__ void update_state(
+   void update_state(
       const float& time_offset_seconds,
       const float& radius_noise_0,
       const float& radius_noise_1,
@@ -115,14 +115,14 @@ class prediction {
     center_velocity_ = center_velocity_ + d_center_velocity;
   }
 
-  __host__ __device__ [[nodiscard]] const float& radius_0() const noexcept { return radius_0_; }
-  __host__ __device__ [[nodiscard]] const float& radius_1() const noexcept { return radius_1_; }
-  __host__ __device__ [[nodiscard]] const float& orientation() const noexcept { return orientation_; }
-  __host__ __device__ [[nodiscard]] const float& orientation_velocity() const noexcept { return orientation_velocity_; }
-  __host__ __device__ [[nodiscard]] const Eigen::Vector3f& center() const noexcept { return center_; }
-  __host__ __device__ [[nodiscard]] const Eigen::Vector3f& center_velocity() const noexcept { return center_velocity_; }
+   [[nodiscard]] const float& radius_0() const noexcept { return radius_0_; }
+   [[nodiscard]] const float& radius_1() const noexcept { return radius_1_; }
+   [[nodiscard]] const float& orientation() const noexcept { return orientation_; }
+   [[nodiscard]] const float& orientation_velocity() const noexcept { return orientation_velocity_; }
+   [[nodiscard]] const Eigen::Vector3f& center() const noexcept { return center_; }
+   [[nodiscard]] const Eigen::Vector3f& center_velocity() const noexcept { return center_velocity_; }
 
-  __host__ __device__ prediction() noexcept
+   prediction() noexcept
       : radius_0_{0.0f},
         radius_1_{0.0f},
         orientation_{0.0f},
@@ -130,7 +130,7 @@ class prediction {
         center_{Eigen::Vector3f::Zero()},
         center_velocity_{Eigen::Vector3f::Zero()} {}
 
-  __host__ __device__ prediction(
+   prediction(
       const float& radius_0,
       const float& radius_1,
       const float& orientation,

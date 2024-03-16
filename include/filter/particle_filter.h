@@ -33,9 +33,9 @@ class particle_filter {
 
   systematic_resampler<prediction_type, std::size_t> resampler_;
 
-  thrust::device_vector<sampler_type> sampler_states_;
-  thrust::device_vector<floating_point_type> log_particle_weights_;
-  thrust::device_vector<prediction_type> particle_states_;
+  thrust::omp::vector<sampler_type> sampler_states_;
+  thrust::omp::vector<floating_point_type> log_particle_weights_;
+  thrust::omp::vector<prediction_type> particle_states_;
 
  public:
   [[nodiscard]] prediction_type extrapolate_state(const float& time_offset_seconds) const noexcept {
@@ -44,7 +44,7 @@ class particle_filter {
 
   void update_state_sans_observation(const float& time_offset_seconds) noexcept {
     thrust::for_each(
-        thrust::device,
+        thrust::omp::par,
         thrust::make_zip_iterator(sampler_states_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds] __device__(thrust::tuple<sampler_type&, prediction_type&> tuple) {
@@ -54,7 +54,7 @@ class particle_filter {
         });
 
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      thrust::device,
+                                      thrust::omp::par,
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),
@@ -65,7 +65,7 @@ class particle_filter {
 
   void update_state_with_observation(const float& time_offset_seconds, const observation_type& observation_state) noexcept {
     thrust::for_each(
-        thrust::device,
+        thrust::omp::par,
         thrust::make_zip_iterator(sampler_states_.begin(), log_particle_weights_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), log_particle_weights_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds, observation_state] __device__(
@@ -80,7 +80,7 @@ class particle_filter {
 
     resampler_.resample(log_particle_weights_, particle_states_);
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      thrust::device,
+                                      thrust::omp::par,
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),
@@ -93,7 +93,7 @@ class particle_filter {
     thrust::counting_iterator<std::size_t> index_sequence_begin(std::size_t{});
 
     thrust::for_each(
-        thrust::device,
+        thrust::omp::par,
         thrust::make_zip_iterator(index_sequence_begin, sampler_states_.begin()),
         thrust::make_zip_iterator(index_sequence_begin + number_of_particles, sampler_states_.end()),
         [number_of_particles] __device__(thrust::tuple<std::size_t, sampler_type&> tuple) {
@@ -103,7 +103,7 @@ class particle_filter {
         });
 
     thrust::transform(
-        thrust::device,
+        thrust::omp::par,
         sampler_states_.begin(),
         sampler_states_.end(),
         particle_states_.begin(),
@@ -112,7 +112,7 @@ class particle_filter {
         });
 
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      thrust::device,
+                                      thrust::omp::par,
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),

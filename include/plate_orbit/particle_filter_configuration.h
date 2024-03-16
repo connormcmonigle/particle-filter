@@ -20,7 +20,7 @@ namespace plate_orbit {
 
 namespace helper {
 
-__device__ [[nodiscard]] inline float log_sigmoid(const float& x) noexcept { return -__logf(1.0f + __expf(-x)); }
+__device__ [[nodiscard]] inline float log_sigmoid(const float& x) noexcept { return -log(1.0f + exp(-x)); }
 
 }  // namespace helper
 

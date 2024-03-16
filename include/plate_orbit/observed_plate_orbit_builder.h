@@ -14,7 +14,7 @@ class observed_plate_orbit_builder {
   Eigen::Vector3f observer_position_;
 
  public:
-  __host__ __device__ observed_plate_orbit from_one_plate(const observed_plate& plate_one) const noexcept {
+   observed_plate_orbit from_one_plate(const observed_plate& plate_one) const noexcept {
     const Eigen::Vector3f observer_relative_position = plate_one.position() - observer_position_;
     const Eigen::Vector3f projected_relative{observer_relative_position[0], observer_relative_position[1], 0.0};
     const Eigen::Vector3f predicted_center = plate_one.position() + radius_prior_ * projected_relative.normalized();
@@ -25,7 +25,7 @@ class observed_plate_orbit_builder {
     return observed_plate_orbit{radius_prior_, predicted_orientation, predicted_center};
   }
 
-  __host__ __device__ observed_plate_orbit
+   observed_plate_orbit
   from_two_plates(const observed_plate& plate_one, const observed_plate& plate_two) const noexcept {
     const Eigen::Vector3f midpoint = 0.5f * (plate_one.position() + plate_two.position());
     const Eigen::Vector3f one_to_two = plate_two.position() - plate_one.position();
@@ -44,7 +44,7 @@ class observed_plate_orbit_builder {
     return observed_plate_orbit{predicted_radius, predicted_orientation, predicted_center};
   }
 
-  __host__ __device__ observed_plate_orbit_builder(const float& radius_prior, const Eigen::Vector3f& observer_position) noexcept
+   observed_plate_orbit_builder(const float& radius_prior, const Eigen::Vector3f& observer_position) noexcept
       : radius_prior_{radius_prior}, observer_position_{observer_position} {}
 };
 

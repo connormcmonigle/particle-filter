@@ -222,5 +222,5 @@ if __name__ == "__main__":
     simulated_robot_state = SimulatedRobotState(
         radius=0.1, angle=0.0, angular_velocity=0.0, center=np.zeros(3), observer=np.zeros(3))
     demo = InteractivePointFilterDemo(window_title="demo", resolution=(
-        1024, 1024), simulated_robot_state=simulated_robot_state, number_of_particles=(1 << 20), config=config)
+        1024, 1024), simulated_robot_state=simulated_robot_state, number_of_particles=(1 << 17), config=config)
     demo.render_loop()
