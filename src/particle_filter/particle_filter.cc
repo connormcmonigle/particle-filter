@@ -1,3 +1,4 @@
+#include <fast_plate_orbit/init.h>
 #include <plate_orbit/init.h>
 #include <point/init.h>
 
@@ -5,6 +6,7 @@
 #include <pybind11/pybind11.h>
 
 PYBIND11_MODULE(particle_filter, m) {
-    point::init(m);
-    plate_orbit::init(m);
+  point::init(m);
+  plate_orbit::init(m);
+  fast_plate_orbit::init(m);
 }
