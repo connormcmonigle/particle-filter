@@ -91,5 +91,5 @@ if __name__ == "__main__":
     VELOCITY_PROCESS_DIAGONAL_COVARIANCE = np.array([3.0, 3.0, 0.001])
 
     config = point.ParticleFilterConfigurationParameters(VELOCITY_PRIOR_DIAGONAL_COVARIANCE, VELOCITY_PROCESS_DIAGONAL_COVARIANCE)
-    demo = InteractivePointFilterDemo(window_title="demo", resolution=(1024, 1024), number_of_particles=1 << 20, config=config)
+    demo = InteractivePointFilterDemo(window_title="demo", resolution=(1024, 1024), number_of_particles=1 << 24, config=config)
     demo.render_loop()

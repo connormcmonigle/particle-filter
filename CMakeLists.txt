@@ -19,6 +19,9 @@ pybind11_add_module (
 
   src/plate_orbit/init.cc
   src/plate_orbit/particle_filter.cu
+
+  src/fast_plate_orbit/init.cc
+  src/fast_plate_orbit/particle_filter.cu
 )
 
 target_compile_features (particle_filter PRIVATE cxx_std_17)
