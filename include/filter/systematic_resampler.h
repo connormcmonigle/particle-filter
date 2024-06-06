@@ -13,6 +13,7 @@
 #include <thrust/tuple.h>
 
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 
@@ -140,7 +141,8 @@ class systematic_resampler {
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
         thrust::make_zip_iterator(temp_particle_indices_.end(), temp_particles_.end()),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
-        [] __host__ __device__(const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
+        [] __host__ __device__(
+            const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
           return (a.template get<0>() > b.template get<0>()) ? a : b;
         });
 

@@ -12,7 +12,7 @@ from particle_filter import fast_plate_orbit
 ANGULAR_VELOCITY_STEP_SIZE = 2.0
 POSITION_DIAGONAL_COVARIANCE = np.array([0.0001, 0.0001, 0.0001])
 RADIAL_OFFSETS = [0.0, 0.0, 0.0, 0.0]
-Z_OFFSETS = [0.007, 0.0, 0.007, 0.0]
+Z_OFFSETS = [0.0, 0.007, 0.0, 0.007]
 VISIBILITY_ANGLE_THRESHOLD = math.pi / 3.0
 
 
@@ -218,7 +218,7 @@ class InteractivePointFilterDemo:
 
 if __name__ == "__main__":
     config = fast_plate_orbit.ParticleFilterConfigurationParameters(
-        0.11, 2.0, 0.001, 0.005, 0.0001, 6.0, 0.8, 0.1, np.array([6.0, 6.0]), np.array([3.0, 3.0]))
+        0.11, 2.0, 0.001, 0.005, 0.0001, 6.0, 1.5, 3.0, np.array([6.0, 6.0]), np.array([10.0, 10.0]))
     simulated_robot_state = SimulatedRobotState(
         radius=0.1, angle=0.0, angular_velocity=0.0, center=np.zeros(3), observer=np.zeros(3))
     demo = InteractivePointFilterDemo(window_title="demo", resolution=(

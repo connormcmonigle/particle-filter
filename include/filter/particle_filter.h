@@ -31,7 +31,7 @@ class particle_filter {
 
   prediction_type most_likely_particle_state_;
 
-  systematic_resampler<prediction_type, std::size_t> resampler_;
+  systematic_resampler<prediction_type, std::uint32_t> resampler_;
 
   thrust::device_vector<sampler_type> sampler_states_;
   thrust::device_vector<floating_point_type> log_particle_weights_;
