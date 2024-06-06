@@ -1,22 +1,23 @@
 #pragma once
 #include <cstddef>
+#include <cstdint>
 
 namespace filter {
 
 template <typename T>
 struct particle_reduction_state {
   T most_likely_particle_;
-  std::size_t count_;
+  std::uint32_t count_;
 
   __host__ __device__ [[nodiscard]] constexpr const T& most_likely_particle() const noexcept { return most_likely_particle_; }
-  __host__ __device__ [[nodiscard]] constexpr const std::size_t& count() const noexcept { return count_; }
+  __host__ __device__ [[nodiscard]] constexpr const std::uint32_t& count() const noexcept { return count_; }
 
   __host__ __device__ [[nodiscard]] static constexpr particle_reduction_state<T> zero() noexcept {
-    return particle_reduction_state<T>{T{}, std::size_t{}};
+    return particle_reduction_state<T>{T{}, std::uint32_t{}};
   }
 
   __host__ __device__ [[nodiscard]] static constexpr particle_reduction_state<T> from_one_particle(const T& particle) noexcept {
-    return particle_reduction_state<T>{particle, std::size_t{1}};
+    return particle_reduction_state<T>{particle, std::uint32_t{1}};
   }
 };
 
