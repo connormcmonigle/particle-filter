@@ -1,9 +1,9 @@
 #pragma once
 
+#include <config/target_config.h>
+#include <filter/concepts/particle_filter_configuration.h>
 #include <filter/particle_reduction_state.h>
 #include <filter/systematic_resampler.h>
-#include <thrust/device_vector.h>
-#include <thrust/execution_policy.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/random.h>
 #include <thrust/transform_reduce.h>
@@ -17,6 +17,7 @@
 namespace filter {
 
 template <typename ParticleFilterConfiguration, typename RandomVariableSampler = util::default_rv_sampler>
+  requires concepts::particle_filter_configuration<ParticleFilterConfiguration>
 class particle_filter {
  private:
   using particle_configuration_type = ParticleFilterConfiguration;
@@ -26,16 +27,15 @@ class particle_filter {
   using sampler_type = RandomVariableSampler;
   using rng_type = typename RandomVariableSampler::rng_type;
   using floating_point_type = typename RandomVariableSampler::floating_point_type;
-  
+
   ParticleFilterConfiguration config_;
 
   prediction_type most_likely_particle_state_;
-
   systematic_resampler<prediction_type, std::uint32_t> resampler_;
 
-  thrust::device_vector<sampler_type> sampler_states_;
-  thrust::device_vector<floating_point_type> log_particle_weights_;
-  thrust::device_vector<prediction_type> particle_states_;
+  target_config::vector<sampler_type> sampler_states_;
+  target_config::vector<floating_point_type> log_particle_weights_;
+  target_config::vector<prediction_type> particle_states_;
 
  public:
   [[nodiscard]] prediction_type extrapolate_state(const float& time_offset_seconds) const noexcept {
@@ -44,10 +44,11 @@ class particle_filter {
 
   void update_state_sans_observation(const float& time_offset_seconds) noexcept {
     thrust::for_each(
-        thrust::device,
+        target_config::policy,
         thrust::make_zip_iterator(sampler_states_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), particle_states_.end()),
-        [config = config_, time_offset_seconds] __device__(thrust::tuple<sampler_type&, prediction_type&> tuple) {
+        [config = config_,
+         time_offset_seconds] PARTICLE_FILTER_TARGET_ATTRS(thrust::tuple<sampler_type&, prediction_type&> tuple) {
           sampler_type& sampler_state = tuple.template get<0>();
           prediction_type& particle_state = tuple.template get<1>();
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
@@ -65,10 +66,10 @@ class particle_filter {
 
   void update_state_with_observation(const float& time_offset_seconds, const observation_type& observation_state) noexcept {
     thrust::for_each(
-        thrust::device,
+        target_config::policy,
         thrust::make_zip_iterator(sampler_states_.begin(), log_particle_weights_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), log_particle_weights_.end(), particle_states_.end()),
-        [config = config_, time_offset_seconds, observation_state] __device__(
+        [config = config_, time_offset_seconds, observation_state] PARTICLE_FILTER_TARGET_ATTRS(
             thrust::tuple<sampler_type&, floating_point_type&, prediction_type&> tuple) {
           sampler_type& sampler_state = tuple.template get<0>();
           floating_point_type& particle_weight = tuple.template get<1>();
@@ -80,7 +81,7 @@ class particle_filter {
 
     resampler_.resample(log_particle_weights_, particle_states_);
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      thrust::device,
+                                      target_config::policy,
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),
@@ -93,26 +94,26 @@ class particle_filter {
     thrust::counting_iterator<std::size_t> index_sequence_begin(std::size_t{});
 
     thrust::for_each(
-        thrust::device,
+        target_config::policy,
         thrust::make_zip_iterator(index_sequence_begin, sampler_states_.begin()),
         thrust::make_zip_iterator(index_sequence_begin + number_of_particles, sampler_states_.end()),
-        [number_of_particles] __device__(thrust::tuple<std::size_t, sampler_type&> tuple) {
+        [number_of_particles] PARTICLE_FILTER_TARGET_ATTRS(thrust::tuple<std::size_t, sampler_type&> tuple) {
           thrust::default_random_engine generator{};
           generator.discard(tuple.template get<0>());
           tuple.template get<1>().seed(generator());
         });
 
     thrust::transform(
-        thrust::device,
+        target_config::policy,
         sampler_states_.begin(),
         sampler_states_.end(),
         particle_states_.begin(),
-        [config = config_, initial_observation] __device__(sampler_type & sampler_state) {
+        [config = config_, initial_observation] PARTICLE_FILTER_TARGET_ATTRS(sampler_type & sampler_state) {
           return config.sample_from(sampler_state, initial_observation);
         });
 
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      thrust::device,
+                                      target_config::policy,
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),

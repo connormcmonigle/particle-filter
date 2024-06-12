@@ -1,9 +1,0 @@
-[build-system]
-requires = [
-    "setuptools>=59",
-    "wheel",
-    "scikit-build",
-    "cmake",
-    "ninja"
-]
-build-backend = "setuptools.build_meta"

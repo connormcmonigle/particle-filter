@@ -1,12 +1,12 @@
 #pragma once
 
-#include <thrust/execution_policy.h>
+#include <config/target_config.h>
 
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <tuple>
 #include <type_traits>
-#include <array>
-#include <algorithm>
 
 namespace util {
 
@@ -16,30 +16,30 @@ struct device_array {
 
   T data_[N];
 
-  __host__ __device__ [[nodiscard]] constexpr std::size_t size() const noexcept { return N; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr std::size_t size() const noexcept { return N; }
 
-  __host__ __device__ [[nodiscard]] constexpr T* data() noexcept { return data_; }
-  __host__ __device__ [[nodiscard]] constexpr const T* data() const noexcept { return data_; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T* data() noexcept { return data_; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* data() const noexcept { return data_; }
 
-  __host__ __device__ [[nodiscard]] constexpr T* begin() noexcept { return data_; }
-  __host__ __device__ [[nodiscard]] constexpr T* end() noexcept { return data_ + N; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T* begin() noexcept { return data_; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T* end() noexcept { return data_ + N; }
 
-  __host__ __device__ [[nodiscard]] constexpr const T* begin() const noexcept { return data_; }
-  __host__ __device__ [[nodiscard]] constexpr const T* end() const noexcept { return data_ + N; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* begin() const noexcept { return data_; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* end() const noexcept { return data_ + N; }
 
-  __host__ __device__ [[nodiscard]] constexpr const T* cbegin() const noexcept { return data_; }
-  __host__ __device__ [[nodiscard]] constexpr const T* cend() const noexcept { return data_ + N; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* cbegin() const noexcept { return data_; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* cend() const noexcept { return data_ + N; }
 
-  __host__ __device__ [[nodiscard]] constexpr T& operator[](const std::size_t& idx) noexcept { return data_[idx]; }
-  __host__ __device__ [[nodiscard]] constexpr const T& operator[](const std::size_t& idx) const noexcept { return data_[idx]; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T& operator[](const std::size_t& idx) noexcept { return data_[idx]; }
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T& operator[](const std::size_t& idx) const noexcept { return data_[idx]; }
 
   template <std::size_t Index>
-  __host__ __device__ [[nodiscard]] T& get() noexcept {
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] T& get() noexcept {
     return data_[Index];
   }
 
   template <std::size_t Index>
-  __host__ __device__ [[nodiscard]] const T& get() const noexcept {
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] const T& get() const noexcept {
     return data_[Index];
   }
 
@@ -50,7 +50,7 @@ struct device_array {
   };
 
   template <typename F>
-  __host__ __device__ [[nodiscard]] inline device_array<typename std::result_of<F(T)>::type, N> transformed(
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline device_array<typename std::result_of<F(T)>::type, N> transformed(
       F&& f) const noexcept {
     device_array<typename std::result_of<F(T)>::type, N> result{};
     auto in_iter = data_;
@@ -59,7 +59,7 @@ struct device_array {
   }
 
   template <typename F>
-  __host__ __device__ [[nodiscard]] inline device_array<T, N>& selection_sort_by(F&& f) noexcept {
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline device_array<T, N>& selection_sort_by(F&& f) noexcept {
     auto keys = transformed(f);
 
     auto i_val = data_;
@@ -83,7 +83,7 @@ struct device_array {
   }
 
   template <typename F>
-  __host__ __device__ [[nodiscard]] inline const T* minimum_by(F&& f) const noexcept {
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline const T* minimum_by(F&& f) const noexcept {
     const auto keys = transformed(f);
 
     auto min_val = data_;

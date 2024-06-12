@@ -1,5 +1,6 @@
 #pragma once
 
+#include <config/target_config.h>
 #include <filter/particle_reduction_state.h>
 #include <point/observation.h>
 #include <point/particle_filter_configuration_parameters.h>
@@ -14,7 +15,7 @@ namespace point {
 struct most_likely_particle_reduction_impl {
   using state_type = filter::particle_reduction_state<prediction>;
 
-  __device__ [[nodiscard]] inline state_type operator()(const state_type& a, const state_type& b) const noexcept {
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline state_type operator()(const state_type& a, const state_type& b) const noexcept {
     const prediction a_particle = a.most_likely_particle();
     const prediction b_particle = b.most_likely_particle();
 
@@ -42,7 +43,7 @@ class particle_filter_configuration {
     return most_likely_particle_reduction_impl{};
   }
 
-  __device__ [[nodiscard]] float conditional_log_likelihood(
+  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] float conditional_log_likelihood(
       const util::default_rv_sampler& sampler,
       const observation& state,
       const prediction& given) const noexcept {
@@ -50,18 +51,14 @@ class particle_filter_configuration {
     return sampler.unnormalized_normal_log_density(state.position_diagonal_covariance(), error);
   }
 
-  __device__ prediction sample_from(
-      util::default_rv_sampler& sampler,
-      const observation& state) const noexcept {
+  PARTICLE_FILTER_TARGET_ATTRS prediction sample_from(util::default_rv_sampler& sampler, const observation& state) const noexcept {
     const auto position_noise = sampler.normal_sample(state.position_diagonal_covariance());
     const auto velocity_noise = sampler.normal_sample(velocity_prior_diagonal_covariance_);
     return prediction(state.position() + position_noise, velocity_noise);
   }
 
-  __device__ void apply_process(
-      const float& time_offset_seconds,
-      util::default_rv_sampler& sampler,
-      prediction& state) const noexcept {
+  PARTICLE_FILTER_TARGET_ATTRS void apply_process(const float& time_offset_seconds, util::default_rv_sampler& sampler, prediction& state)
+      const noexcept {
     const auto noise_0 = sampler.normal_sample(velocity_process_diagonal_covariance_);
     const auto noise_1 = sampler.normal_sample(velocity_process_diagonal_covariance_);
     state.update_state(time_offset_seconds, noise_0, noise_1);
@@ -73,4 +70,3 @@ class particle_filter_configuration {
 };
 
 }  // namespace point
-
