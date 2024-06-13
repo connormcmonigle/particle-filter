@@ -3,7 +3,24 @@ name: Test
 on: [push]
 
 jobs:
-  Tests:
+  BuildOmp:
+    runs-on: ubuntu-22.04
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - uses: Jimver/cuda-toolkit@v0.2.15
+      id: cuda-toolkit
+      with:
+        cuda: '12.4.1'
+        method: 'network'
+        sub-packages: '["nvcc", "thrust"]'
+    - run: sudo apt install -y cmake build-essential g++
+    - run: cmake .
+    - run: make
+
+  RunTests:
+    needs: BuildOmp
+
     runs-on: ubuntu-22.04
 
     steps:
