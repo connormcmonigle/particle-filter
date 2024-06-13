@@ -18,7 +18,7 @@ jobs:
         sub-packages: '["nvcc", "thrust"]'
     - run: sudo apt install -y cmake build-essential g++
     - run: cmake .
-    - run: make
+    - run: make omp_tests
 
   RunTests:
     needs: BuildOmp
@@ -38,7 +38,7 @@ jobs:
 
     - run: sudo apt install -y cmake build-essential g++
     - run: cmake .
-    - run: make
-    - run: ./tests
+    - run: make omp_tests
+    - run: ./omp_tests
 
   
