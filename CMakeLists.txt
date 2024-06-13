@@ -1,8 +1,5 @@
 cmake_minimum_required (VERSION 3.24)
 project (particle_filter LANGUAGES CXX CUDA)
-
-find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
-
 include (GNUInstallDirs)
 
 set (CMAKE_CXX_STANDARD 17)
