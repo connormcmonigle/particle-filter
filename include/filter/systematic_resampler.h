@@ -22,24 +22,20 @@ struct truncated_representation {
   T integral_component_;
   float partial_component_;
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr operator T() const noexcept { return integral_component_; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr operator T() const noexcept { return integral_component_; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T& integral_component() const noexcept {
-    return integral_component_;
-  }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const T& integral_component() const noexcept { return integral_component_; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const float& partial_component() const noexcept {
-    return partial_component_;
-  }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const float& partial_component() const noexcept { return partial_component_; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] static inline truncated_representation<T> from_value(const float& value) noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] static inline truncated_representation<T> from_value(const float& value) noexcept {
     const float truncated_value = floor(value);
     const T integral_component = static_cast<T>(truncated_value);
     const float partial_component = value - truncated_value;
     return truncated_representation<T>{integral_component, partial_component};
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] static inline truncated_representation<T>
+  PF_TARGET_ATTRS [[nodiscard]] static inline truncated_representation<T>
   bounded_plus(const T& bound, const truncated_representation<T>& a, const truncated_representation<T>& b) noexcept {
     const auto c = truncated_representation<T>::from_value(a.partial_component() + b.partial_component());
     const T integral_component = a.integral_component() + b.integral_component() + c.integral_component();
@@ -47,11 +43,11 @@ struct truncated_representation {
     return truncated_representation<T>{thrust::min(bound, integral_component), partial_component};
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] static constexpr truncated_representation<T> from_integral(const T& value) noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] static constexpr truncated_representation<T> from_integral(const T& value) noexcept {
     return truncated_representation<T>{value, float{}};
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] static constexpr truncated_representation<T> zero() noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] static constexpr truncated_representation<T> zero() noexcept {
     return truncated_representation<T>{T{}, float{}};
   }
 };
@@ -60,7 +56,7 @@ template <typename T>
 struct scaled_truncated_representation_transform {
   float scale_;
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline truncated_representation<T> operator()(const float& value) noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] inline truncated_representation<T> operator()(const float& value) noexcept {
     return truncated_representation<T>::from_value(scale_ * value);
   }
 
@@ -71,7 +67,7 @@ template <typename T>
 struct truncated_representation_bounded_plus {
   T bound_;
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline truncated_representation<T> operator()(
+  PF_TARGET_ATTRS [[nodiscard]] inline truncated_representation<T> operator()(
       const truncated_representation<T>& a,
       const truncated_representation<T>& b) const noexcept {
     return truncated_representation<T>::bounded_plus(bound_, a, b);
@@ -106,9 +102,7 @@ class systematic_resampler {
         log_weights.cbegin(),
         log_weights.cend(),
         particle_weights_.begin(),
-        [maximum_log_weight] PARTICLE_FILTER_TARGET_ATTRS(const weight_type& log_weight) {
-          return expf(log_weight - maximum_log_weight);
-        });
+        [maximum_log_weight] PF_TARGET_ATTRS(const weight_type& log_weight) { return expf(log_weight - maximum_log_weight); });
 
     const weight_type cumulative_particle_weight =
         thrust::reduce(target_config::policy, particle_weights_.cbegin(), particle_weights_.cend());
@@ -135,11 +129,10 @@ class systematic_resampler {
         thrust::make_zip_iterator(input_index_iterator + number_of_particles_ + one, particles.cend()),
         thrust::make_transform_iterator(
             particle_scatter_indices_.cbegin(),
-            [] PARTICLE_FILTER_TARGET_ATTRS(const truncated_representation_type& index) { return index.integral_component(); }),
+            [] PF_TARGET_ATTRS(const truncated_representation_type& index) { return index.integral_component(); }),
         thrust::make_zip_iterator(particle_scatter_indices_.cbegin(), std::next(particle_scatter_indices_.cbegin())),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
-        [] PARTICLE_FILTER_TARGET_ATTRS(
-            const thrust::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
+        [] PF_TARGET_ATTRS(const thrust::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
           return tuple.template get<1>().integral_component() > tuple.template get<0>().integral_component();
         });
 
@@ -148,8 +141,7 @@ class systematic_resampler {
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
         thrust::make_zip_iterator(temp_particle_indices_.end(), temp_particles_.end()),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
-        [] PARTICLE_FILTER_TARGET_ATTRS(
-            const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
+        [] PF_TARGET_ATTRS(const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
           return (a.template get<0>() > b.template get<0>()) ? a : b;
         });
 

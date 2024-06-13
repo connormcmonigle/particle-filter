@@ -12,7 +12,7 @@ class prediction {
   Eigen::Vector3f velocity_;
 
  public:
-  PARTICLE_FILTER_TARGET_ATTRS void
+  PF_TARGET_ATTRS void
   update_state(const float& time_offset_seconds, const Eigen::Vector3f& noise_0, const Eigen::Vector3f& noise_1) noexcept {
     static constexpr float one_half = 1.0 / 2.0;
     static constexpr float one_twelfth = 1.0 / 12.0;
@@ -28,16 +28,16 @@ class prediction {
     velocity_ = velocity_ + d_velocity;
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] prediction extrapolate_state(const float& time_offset_seconds) const noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] prediction extrapolate_state(const float& time_offset_seconds) const noexcept {
     const Eigen::Vector3f extrapolated_position = position_ + time_offset_seconds * velocity_;
     return prediction(extrapolated_position, velocity_);
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] const Eigen::Vector3f& position() const noexcept { return position_; }
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] const Eigen::Vector3f& velocity() const noexcept { return velocity_; }
+  PF_TARGET_ATTRS [[nodiscard]] const Eigen::Vector3f& position() const noexcept { return position_; }
+  PF_TARGET_ATTRS [[nodiscard]] const Eigen::Vector3f& velocity() const noexcept { return velocity_; }
 
-  PARTICLE_FILTER_TARGET_ATTRS prediction() noexcept : position_{Eigen::Vector3f::Zero()}, velocity_{Eigen::Vector3f::Zero()} {}
-  PARTICLE_FILTER_TARGET_ATTRS prediction(const Eigen::Vector3f& position, const Eigen::Vector3f& velocity) noexcept
+  PF_TARGET_ATTRS prediction() noexcept : position_{Eigen::Vector3f::Zero()}, velocity_{Eigen::Vector3f::Zero()} {}
+  PF_TARGET_ATTRS prediction(const Eigen::Vector3f& position, const Eigen::Vector3f& velocity) noexcept
       : position_{position}, velocity_{velocity} {}
 };
 

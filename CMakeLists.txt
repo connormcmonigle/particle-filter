@@ -10,7 +10,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -ffast-math -Wall -Wextra -flto 
 
 add_executable(test test/src/main.cc)
 
-add_definitions(-DPARTICLE_FILTER_TARGET_OMP)
+add_definitions(-DPF_TARGET_OMP)
 target_compile_features (test PRIVATE cxx_std_20)
 target_include_directories (test PRIVATE include test/include eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 

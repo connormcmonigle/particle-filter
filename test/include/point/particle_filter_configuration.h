@@ -15,7 +15,7 @@ namespace point {
 struct most_likely_particle_reduction_impl {
   using state_type = filter::particle_reduction_state<prediction>;
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline state_type operator()(const state_type& a, const state_type& b) const noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] inline state_type operator()(const state_type& a, const state_type& b) const noexcept {
     const prediction a_particle = a.most_likely_particle();
     const prediction b_particle = b.most_likely_particle();
 
@@ -43,7 +43,7 @@ class particle_filter_configuration {
     return most_likely_particle_reduction_impl{};
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] float conditional_log_likelihood(
+  PF_TARGET_ATTRS [[nodiscard]] float conditional_log_likelihood(
       const util::default_rv_sampler& sampler,
       const observation& state,
       const prediction& given) const noexcept {
@@ -51,13 +51,13 @@ class particle_filter_configuration {
     return sampler.unnormalized_normal_log_density(state.position_diagonal_covariance(), error);
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS prediction sample_from(util::default_rv_sampler& sampler, const observation& state) const noexcept {
+  PF_TARGET_ATTRS prediction sample_from(util::default_rv_sampler& sampler, const observation& state) const noexcept {
     const auto position_noise = sampler.normal_sample(state.position_diagonal_covariance());
     const auto velocity_noise = sampler.normal_sample(velocity_prior_diagonal_covariance_);
     return prediction(state.position() + position_noise, velocity_noise);
   }
 
-  PARTICLE_FILTER_TARGET_ATTRS void apply_process(const float& time_offset_seconds, util::default_rv_sampler& sampler, prediction& state)
+  PF_TARGET_ATTRS void apply_process(const float& time_offset_seconds, util::default_rv_sampler& sampler, prediction& state)
       const noexcept {
     const auto noise_0 = sampler.normal_sample(velocity_process_diagonal_covariance_);
     const auto noise_1 = sampler.normal_sample(velocity_process_diagonal_covariance_);

@@ -47,15 +47,14 @@ class particle_filter {
         target_config::policy,
         thrust::make_zip_iterator(sampler_states_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), particle_states_.end()),
-        [config = config_,
-         time_offset_seconds] PARTICLE_FILTER_TARGET_ATTRS(thrust::tuple<sampler_type&, prediction_type&> tuple) {
+        [config = config_, time_offset_seconds] PF_TARGET_ONLY_ATTRS(thrust::tuple<sampler_type&, prediction_type&> tuple) {
           sampler_type& sampler_state = tuple.template get<0>();
           prediction_type& particle_state = tuple.template get<1>();
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
         });
 
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      thrust::device,
+                                      target_config::policy,
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),
@@ -69,7 +68,7 @@ class particle_filter {
         target_config::policy,
         thrust::make_zip_iterator(sampler_states_.begin(), log_particle_weights_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), log_particle_weights_.end(), particle_states_.end()),
-        [config = config_, time_offset_seconds, observation_state] PARTICLE_FILTER_TARGET_ATTRS(
+        [config = config_, time_offset_seconds, observation_state] PF_TARGET_ONLY_ATTRS(
             thrust::tuple<sampler_type&, floating_point_type&, prediction_type&> tuple) {
           sampler_type& sampler_state = tuple.template get<0>();
           floating_point_type& particle_weight = tuple.template get<1>();
@@ -97,7 +96,7 @@ class particle_filter {
         target_config::policy,
         thrust::make_zip_iterator(index_sequence_begin, sampler_states_.begin()),
         thrust::make_zip_iterator(index_sequence_begin + number_of_particles, sampler_states_.end()),
-        [number_of_particles] PARTICLE_FILTER_TARGET_ATTRS(thrust::tuple<std::size_t, sampler_type&> tuple) {
+        [number_of_particles] PF_TARGET_ATTRS(thrust::tuple<std::size_t, sampler_type&> tuple) {
           thrust::default_random_engine generator{};
           generator.discard(tuple.template get<0>());
           tuple.template get<1>().seed(generator());
@@ -108,7 +107,7 @@ class particle_filter {
         sampler_states_.begin(),
         sampler_states_.end(),
         particle_states_.begin(),
-        [config = config_, initial_observation] PARTICLE_FILTER_TARGET_ATTRS(sampler_type & sampler_state) {
+        [config = config_, initial_observation] PF_TARGET_ONLY_ATTRS(sampler_type & sampler_state) {
           return config.sample_from(sampler_state, initial_observation);
         });
 

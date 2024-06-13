@@ -16,30 +16,30 @@ struct device_array {
 
   T data_[N];
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr std::size_t size() const noexcept { return N; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr std::size_t size() const noexcept { return N; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T* data() noexcept { return data_; }
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* data() const noexcept { return data_; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr T* data() noexcept { return data_; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const T* data() const noexcept { return data_; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T* begin() noexcept { return data_; }
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T* end() noexcept { return data_ + N; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr T* begin() noexcept { return data_; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr T* end() noexcept { return data_ + N; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* begin() const noexcept { return data_; }
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* end() const noexcept { return data_ + N; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const T* begin() const noexcept { return data_; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const T* end() const noexcept { return data_ + N; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* cbegin() const noexcept { return data_; }
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T* cend() const noexcept { return data_ + N; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const T* cbegin() const noexcept { return data_; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const T* cend() const noexcept { return data_ + N; }
 
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr T& operator[](const std::size_t& idx) noexcept { return data_[idx]; }
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] constexpr const T& operator[](const std::size_t& idx) const noexcept { return data_[idx]; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr T& operator[](const std::size_t& idx) noexcept { return data_[idx]; }
+  PF_TARGET_ATTRS [[nodiscard]] constexpr const T& operator[](const std::size_t& idx) const noexcept { return data_[idx]; }
 
   template <std::size_t Index>
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] T& get() noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] T& get() noexcept {
     return data_[Index];
   }
 
   template <std::size_t Index>
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] const T& get() const noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] const T& get() const noexcept {
     return data_[Index];
   }
 
@@ -50,8 +50,7 @@ struct device_array {
   };
 
   template <typename F>
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline device_array<typename std::result_of<F(T)>::type, N> transformed(
-      F&& f) const noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] inline device_array<typename std::result_of<F(T)>::type, N> transformed(F&& f) const noexcept {
     device_array<typename std::result_of<F(T)>::type, N> result{};
     auto in_iter = data_;
     for (auto out_iter = result.begin(); out_iter != result.end(); ++in_iter, ++out_iter) { *out_iter = f(*in_iter); }
@@ -59,7 +58,7 @@ struct device_array {
   }
 
   template <typename F>
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline device_array<T, N>& selection_sort_by(F&& f) noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] inline device_array<T, N>& selection_sort_by(F&& f) noexcept {
     auto keys = transformed(f);
 
     auto i_val = data_;
@@ -83,7 +82,7 @@ struct device_array {
   }
 
   template <typename F>
-  PARTICLE_FILTER_TARGET_ATTRS [[nodiscard]] inline const T* minimum_by(F&& f) const noexcept {
+  PF_TARGET_ATTRS [[nodiscard]] inline const T* minimum_by(F&& f) const noexcept {
     const auto keys = transformed(f);
 
     auto min_val = data_;
