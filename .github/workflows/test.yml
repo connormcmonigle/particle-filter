@@ -11,5 +11,7 @@ jobs:
       id: cuda-toolkit
       with:
         cuda: '12.4.1'
+        method: 'network'
+        sub-packages: '["nvcc", "thrust"]'
 
     - run: nvcc -V
