@@ -17,8 +17,8 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
   "resamples correctly with one particle"_test = [] {
     filter::systematic_resampler<int, std::size_t> resampler(1u);
 
-    const target_config::vector<float> log_weights = {0.0f};
-    target_config::vector<int> particles = {42};
+    const target_config::vector<float> log_weights{0.0f};
+    target_config::vector<int> particles{42};
 
     resampler.resample(log_weights, particles);
 
@@ -29,8 +29,8 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
   "resamples correctly when all weight is on last particle"_test = [] {
     filter::systematic_resampler<int, std::size_t> resampler(5u);
 
-    const target_config::vector<float> log_weights = {n_inf, n_inf, n_inf, n_inf, 0.0f};
-    target_config::vector<int> particles = {1, 3, 5, 7, 11};
+    const target_config::vector<float> log_weights{n_inf, n_inf, n_inf, n_inf, 0.0f};
+    target_config::vector<int> particles{1, 3, 5, 7, 11};
 
     resampler.resample(log_weights, particles);
 
@@ -41,8 +41,8 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
   "resamples correctly when all weight is on first particle"_test = [] {
     filter::systematic_resampler<int, std::size_t> resampler(5u);
 
-    const target_config::vector<float> log_weights = {0.0f, n_inf, n_inf, n_inf, n_inf};
-    target_config::vector<int> particles = {1, 3, 5, 7, 11};
+    const target_config::vector<float> log_weights{0.0f, n_inf, n_inf, n_inf, n_inf};
+    target_config::vector<int> particles{1, 3, 5, 7, 11};
 
     resampler.resample(log_weights, particles);
 
@@ -53,24 +53,24 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
   "resamples correctly when weights are uniformly distributed"_test = [] {
     filter::systematic_resampler<int, std::size_t> resampler(5u);
 
-    const target_config::vector<float> log_weights = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    target_config::vector<int> particles = {1, 3, 5, 7, 11};
+    const target_config::vector<float> log_weights{0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    target_config::vector<int> particles{1, 3, 5, 7, 11};
 
     resampler.resample(log_weights, particles);
 
-    const target_config::vector<int> expected = {1, 3, 5, 7, 11};
+    const target_config::vector<int> expected{1, 3, 5, 7, 11};
     expect(expected == particles);
   };
 
   "resamples correctly when weights are non-uniformly distributed"_test = [] {
     filter::systematic_resampler<int, std::size_t> resampler(5u);
 
-    const target_config::vector<float> log_weights = {n_inf, n_inf, std::log(1.0f), std::log(2.0f), std::log(2.0f)};
-    target_config::vector<int> particles = {1, 3, 5, 7, 11};
+    const target_config::vector<float> log_weights{n_inf, n_inf, std::log(1.0f), std::log(2.0f), std::log(2.0f)};
+    target_config::vector<int> particles{1, 3, 5, 7, 11};
 
     resampler.resample(log_weights, particles);
 
-    const target_config::vector<int> expected = {5, 7, 7, 11, 11};
+    const target_config::vector<int> expected{5, 7, 7, 11, 11};
     expect(expected == particles);
   };
 };
