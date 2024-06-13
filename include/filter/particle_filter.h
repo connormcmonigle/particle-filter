@@ -48,8 +48,8 @@ class particle_filter {
         thrust::make_zip_iterator(sampler_states_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds] PF_TARGET_ONLY_ATTRS(thrust::tuple<sampler_type&, prediction_type&> tuple) {
-          sampler_type& sampler_state = tuple.template get<0>();
-          prediction_type& particle_state = tuple.template get<1>();
+          sampler_type& sampler_state = thrust::get<0>(tuple);
+          prediction_type& particle_state = thrust::get<1>(tuple);
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
         });
 
@@ -70,9 +70,9 @@ class particle_filter {
         thrust::make_zip_iterator(sampler_states_.end(), log_particle_weights_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds, observation_state] PF_TARGET_ONLY_ATTRS(
             thrust::tuple<sampler_type&, floating_point_type&, prediction_type&> tuple) {
-          sampler_type& sampler_state = tuple.template get<0>();
-          floating_point_type& particle_weight = tuple.template get<1>();
-          prediction_type& particle_state = tuple.template get<2>();
+          sampler_type& sampler_state = thrust::get<0>(tuple);
+          floating_point_type& particle_weight = thrust::get<1>(tuple);
+          prediction_type& particle_state = thrust::get<2>(tuple);
 
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
           particle_weight = config.conditional_log_likelihood(sampler_state, observation_state, particle_state);
@@ -98,8 +98,8 @@ class particle_filter {
         thrust::make_zip_iterator(index_sequence_begin + number_of_particles, sampler_states_.end()),
         [number_of_particles] PF_TARGET_ATTRS(thrust::tuple<std::size_t, sampler_type&> tuple) {
           thrust::default_random_engine generator{};
-          generator.discard(tuple.template get<0>());
-          tuple.template get<1>().seed(generator());
+          generator.discard(thrust::get<0>(tuple));
+          thrust::get<1>(tuple).seed(generator());
         });
 
     thrust::transform(

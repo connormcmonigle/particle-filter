@@ -133,7 +133,7 @@ class systematic_resampler {
         thrust::make_zip_iterator(particle_scatter_indices_.cbegin(), std::next(particle_scatter_indices_.cbegin())),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
         [] PF_TARGET_ATTRS(const thrust::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
-          return tuple.template get<1>().integral_component() > tuple.template get<0>().integral_component();
+          return thrust::get<1>(tuple).integral_component() > thrust::get<0>(tuple).integral_component();
         });
 
     thrust::inclusive_scan(
@@ -142,7 +142,7 @@ class systematic_resampler {
         thrust::make_zip_iterator(temp_particle_indices_.end(), temp_particles_.end()),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
         [] PF_TARGET_ATTRS(const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
-          return (a.template get<0>() > b.template get<0>()) ? a : b;
+          return (thrust::get<0>(a) > thrust::get<0>(b)) ? a : b;
         });
 
     temp_particles_.swap(particles);
