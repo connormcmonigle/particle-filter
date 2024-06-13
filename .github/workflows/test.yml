@@ -38,6 +38,7 @@ jobs:
     - run: make cuda_tests
 
   RunTests:
+    needs: BuildOmp
     needs: BuildCuda
 
     runs-on: ubuntu-22.04
