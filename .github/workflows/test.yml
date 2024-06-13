@@ -25,6 +25,8 @@ jobs:
       with:
         submodules: 'recursive'
 
+    - run: nvcc -V
+    - run: ls
     - run: sudo apt install -y cmake build-essential g++
     - run: mkdir build && cd build
     - run: cmake ..
