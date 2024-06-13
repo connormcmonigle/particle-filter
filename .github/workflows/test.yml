@@ -13,7 +13,7 @@ jobs:
     - uses: Jimver/cuda-toolkit@v0.2.15
       id: cuda-toolkit
       with:
-        cuda: '12.3'
+        cuda: '12.3.0'
         method: 'network'
         sub-packages: '["nvcc", "thrust"]'
     - run: sudo apt install -y cmake build-essential g++
@@ -30,7 +30,7 @@ jobs:
     - uses: Jimver/cuda-toolkit@v0.2.15
       id: cuda-toolkit
       with:
-        cuda: '12.3'
+        cuda: '12.3.0'
         method: 'network'
         sub-packages: '["nvcc", "thrust"]'
     - run: sudo apt install -y cmake build-essential g++
@@ -49,7 +49,7 @@ jobs:
     - uses: Jimver/cuda-toolkit@v0.2.15
       id: cuda-toolkit
       with:
-        cuda: '12.3'
+        cuda: '12.3.0'
         method: 'network'
         sub-packages: '["nvcc", "thrust"]'
 
