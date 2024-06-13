@@ -12,7 +12,7 @@ namespace target_config {
 static constexpr auto& policy = thrust::cuda::par;
 
 template <typename T>
-using vector_type = thrust::cuda::vector<T>;
+using vector = thrust::cuda::vector<T>;
 
 }  // namespace target_config
 

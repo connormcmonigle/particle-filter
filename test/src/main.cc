@@ -1,25 +1,83 @@
-#include <filter/particle_filter.h>
+#include <config/target_config.h>
 #include <filter/concepts/particle_filter_configuration.h>
+#include <filter/particle_filter.h>
+#include <filter/systematic_resampler.h>
 #include <point/observation.h>
 #include <point/particle_filter_configuration.h>
 #include <point/particle_filter_configuration_parameters.h>
 #include <point/prediction.h>
 
 #include <Eigen/Dense>
+#include <algorithm>
+#include <boost/ut.hpp>
+#include <cmath>
 #include <cstddef>
+#include <limits>
+#include <vector>
 
-int main() {
-  const auto params = point::particle_filter_configuration_parameters{
-      .velocity_prior_diagonal_covariance = (Eigen::Vector3f{} << 8.0, 8.0, 0.01).finished(),
-      .velocity_process_diagonal_covariance = (Eigen::Vector3f{} << 8.0, 8.0, 0.01).finished(),
+boost::ut::suite<"systematic_resampler"> errors = [] {
+  using namespace boost::ut;
+  constexpr float n_inf = -std::numeric_limits<float>::infinity();
+
+  "resamples correctly with one particle"_test = [] {
+    filter::systematic_resampler<int, std::size_t> resampler(1u);
+
+    const target_config::vector<float> log_weights = {0.0f};
+    target_config::vector<int> particles = {42};
+
+    resampler.resample(log_weights, particles);
+
+    expect(1_ul == particles.size());
+    expect(42_i == *particles.begin());
   };
 
-  const auto pos = (Eigen::Vector3f{} << 1.0, 1.0, 0.0).finished();
-  const auto cov = (Eigen::Vector3f{} << 0.1, 0.1, 0.1).finished();
-  const auto initial = point::observation(pos, cov);
+  "resamples correctly when all weight is on last particle"_test = [] {
+    filter::systematic_resampler<int, std::size_t> resampler(5u);
 
-  constexpr std::size_t number_of_particles = static_cast<std::size_t>(1) << 20;
-  auto filter = filter::particle_filter<point::particle_filter_configuration>(number_of_particles, initial, params);
+    const target_config::vector<float> log_weights = {n_inf, n_inf, n_inf, n_inf, 0.0f};
+    target_config::vector<int> particles = {1, 3, 5, 7, 11};
 
-  filter.update_state_with_observation(0.15f, initial);
-}
+    resampler.resample(log_weights, particles);
+
+    expect(5_ul == particles.size());
+    std::for_each(particles.begin(), particles.end(), [&](const auto& particle) { expect(11_i == particle); });
+  };
+
+  "resamples correctly when all weight is on first particle"_test = [] {
+    filter::systematic_resampler<int, std::size_t> resampler(5u);
+
+    const target_config::vector<float> log_weights = {0.0f, n_inf, n_inf, n_inf, n_inf};
+    target_config::vector<int> particles = {1, 3, 5, 7, 11};
+
+    resampler.resample(log_weights, particles);
+
+    expect(5_ul == particles.size());
+    std::for_each(particles.begin(), particles.end(), [&](const auto& particle) { expect(1_i == particle); });
+  };
+
+  "resamples correctly when weights are uniformly distributed"_test = [] {
+    filter::systematic_resampler<int, std::size_t> resampler(5u);
+
+    const target_config::vector<float> log_weights = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    target_config::vector<int> particles = {1, 3, 5, 7, 11};
+
+    resampler.resample(log_weights, particles);
+
+    const target_config::vector<int> expected = {1, 3, 5, 7, 11};
+    expect(expected == particles);
+  };
+
+  "resamples correctly when weights are non-uniformly distributed"_test = [] {
+    filter::systematic_resampler<int, std::size_t> resampler(5u);
+
+    const target_config::vector<float> log_weights = {n_inf, n_inf, std::log(1.0f), std::log(2.0f), std::log(2.0f)};
+    target_config::vector<int> particles = {1, 3, 5, 7, 11};
+
+    resampler.resample(log_weights, particles);
+
+    const target_config::vector<int> expected = {5, 7, 7, 11, 11};
+    expect(expected == particles);
+  };
+};
+
+int main() {}
