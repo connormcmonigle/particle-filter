@@ -17,10 +17,9 @@ jobs:
         method: 'network'
         sub-packages: '["nvcc", "thrust"]'
 
-    - run: nvcc -V
-    - run: ls
     - run: sudo apt install -y cmake build-essential g++
     - run: cmake .
     - run: make
+    - run: ./tests
 
   
