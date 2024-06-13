@@ -68,7 +68,7 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
 
     resampler.resample(log_weights, particles);
 
-    const target_config::vector<int> expected{1, 3, 5, 7, 11};
+    const target_config::vector<int> expected = of<int>(1, 3, 5, 7, 11);
     expect(expected == particles);
   };
 
@@ -80,7 +80,7 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
 
     resampler.resample(log_weights, particles);
 
-    const target_config::vector<int> expected{5, 7, 7, 11, 11};
+    const target_config::vector<int> expected = of<int>(5, 7, 7, 11, 11);
     expect(expected == particles);
   };
 };
