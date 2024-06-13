@@ -3,7 +3,7 @@ project (particle_filter LANGUAGES CXX CUDA)
 include (GNUInstallDirs)
 
 set (CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -ffast-math -Wall -Wextra -flto -fopenmp -lgomp")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -ffast-math -Wpedantic -Wall -Wextra -flto -fopenmp -lgomp")
 
 add_executable(test test/src/main.cc)
 
