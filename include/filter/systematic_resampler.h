@@ -14,10 +14,11 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
+#include <concepts>
 
 namespace filter {
 
-template <typename T, typename std::enable_if<std::is_integral<T>::value, T>::type* = nullptr>
+template <typename T> requires std::unsigned_integral<T>
 struct truncated_representation {
   T integral_component_;
   float partial_component_;
@@ -52,7 +53,7 @@ struct truncated_representation {
   }
 };
 
-template <typename T>
+template <typename T> requires std::unsigned_integral<T>
 struct scaled_truncated_representation_transform {
   float scale_;
 
@@ -63,7 +64,7 @@ struct scaled_truncated_representation_transform {
   constexpr scaled_truncated_representation_transform(const float& scale) noexcept : scale_{scale} {}
 };
 
-template <typename T>
+template <typename T> requires std::unsigned_integral<T>
 struct truncated_representation_bounded_plus {
   T bound_;
 
@@ -76,7 +77,7 @@ struct truncated_representation_bounded_plus {
   constexpr truncated_representation_bounded_plus(const T& bound) noexcept : bound_{bound} {}
 };
 
-template <typename T, typename I>
+template <typename T, typename I> requires std::unsigned_integral<I>
 class systematic_resampler {
   using weight_type = float;
   using particle_type = T;
