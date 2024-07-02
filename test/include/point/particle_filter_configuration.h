@@ -39,6 +39,8 @@ class particle_filter_configuration {
   using observation_type = observation;
   using prediction_type = prediction;
 
+  using sampler_type = util::default_rv_sampler;
+
   [[nodiscard]] most_likely_particle_reduction_impl most_likely_particle_reduction() const noexcept {
     return most_likely_particle_reduction_impl{};
   }

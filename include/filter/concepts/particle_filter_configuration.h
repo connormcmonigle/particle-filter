@@ -3,6 +3,7 @@
 #include <filter/concepts/observation.h>
 #include <filter/concepts/particle_reduction_operation.h>
 #include <filter/concepts/prediction.h>
+#include <filter/concepts/sampler.h>
 #include <util/random_variable_sampler.h>
 
 #include <concepts>
@@ -15,9 +16,11 @@ template <typename T>
 concept particle_filter_configuration = requires(
     const T c,
     const float t,
-    util::default_rv_sampler s,
+    typename T::sampler_type s,
     const typename T::observation_type o,
     typename T::prediction_type p) {
+
+  requires sampler<typename T::sampler_type>;
   requires observation<typename T::observation_type>;
   requires prediction<typename T::prediction_type>;
 

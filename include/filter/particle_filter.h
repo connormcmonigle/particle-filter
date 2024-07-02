@@ -11,22 +11,19 @@
 #include <util/random_variable_sampler.h>
 
 #include <algorithm>
-#include <random>
 #include <utility>
 
 namespace filter {
 
-template <typename ParticleFilterConfiguration, typename RandomVariableSampler = util::default_rv_sampler>
+template <typename ParticleFilterConfiguration>
   requires concepts::particle_filter_configuration<ParticleFilterConfiguration>
 class particle_filter {
  private:
   using particle_configuration_type = ParticleFilterConfiguration;
+
   using observation_type = typename ParticleFilterConfiguration::observation_type;
   using prediction_type = typename ParticleFilterConfiguration::prediction_type;
-
-  using sampler_type = RandomVariableSampler;
-  using rng_type = typename RandomVariableSampler::rng_type;
-  using floating_point_type = typename RandomVariableSampler::floating_point_type;
+  using sampler_type = typename ParticleFilterConfiguration::sampler_type;
 
   ParticleFilterConfiguration config_;
 
@@ -34,7 +31,7 @@ class particle_filter {
   systematic_resampler<prediction_type, std::uint32_t> resampler_;
 
   target_config::vector<sampler_type> sampler_states_;
-  target_config::vector<floating_point_type> log_particle_weights_;
+  target_config::vector<float> log_particle_weights_;
   target_config::vector<prediction_type> particle_states_;
 
  public:
@@ -69,9 +66,9 @@ class particle_filter {
         thrust::make_zip_iterator(sampler_states_.begin(), log_particle_weights_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), log_particle_weights_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds, observation_state] PF_TARGET_ONLY_ATTRS(
-            thrust::tuple<sampler_type&, floating_point_type&, prediction_type&> tuple) {
+            thrust::tuple<sampler_type&, float&, prediction_type&> tuple) {
           sampler_type& sampler_state = thrust::get<0>(tuple);
-          floating_point_type& particle_weight = thrust::get<1>(tuple);
+          float& particle_weight = thrust::get<1>(tuple);
           prediction_type& particle_state = thrust::get<2>(tuple);
 
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
