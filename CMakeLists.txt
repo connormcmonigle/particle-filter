@@ -15,8 +15,8 @@ target_compile_definitions(cuda_tests PUBLIC PF_TARGET_CUDA THRUST_HOST_SYSTEM=T
 target_compile_features (omp_tests PRIVATE cxx_std_20)
 target_compile_features (cuda_tests PRIVATE cxx_std_20)
 
-target_include_directories (omp_tests PRIVATE include test/include test/include/eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-target_include_directories (cuda_tests PRIVATE include test/include test/include/eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_include_directories (omp_tests PRIVATE . test/include test/include/eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_include_directories (cuda_tests PRIVATE . test/include test/include/eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 set_target_properties(cuda_tests PROPERTIES CUDA_ARCHITECTURES native)
 target_compile_options(cuda_tests PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
