@@ -3,7 +3,7 @@ project (particle_filter LANGUAGES CXX CUDA)
 
 include (GNUInstallDirs)
 
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -ffast-math -Wpedantic -Wall -Wextra -flto -fopenmp -lgomp")
 
 add_executable(omp_tests test/src/main.cc)
@@ -15,10 +15,10 @@ target_compile_definitions(cuda_tests PUBLIC PF_TARGET_CUDA THRUST_HOST_SYSTEM=T
 target_compile_features (omp_tests PRIVATE cxx_std_20)
 target_compile_features (cuda_tests PRIVATE cxx_std_20)
 
-target_include_directories (omp_tests PRIVATE include test/include eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-target_include_directories (cuda_tests PRIVATE include test/include eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_include_directories (omp_tests PRIVATE include test/include test/include/eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_include_directories (cuda_tests PRIVATE include test/include test/include/eigen ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
-set_target_properties(cuda_tests PROPERTIES CUDA_ARCHITECTURES all-major)
+set_target_properties(cuda_tests PROPERTIES CUDA_ARCHITECTURES native)
 target_compile_options(cuda_tests PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
                         --diag-suppress 2811
                        --expt-relaxed-constexpr

@@ -6,22 +6,21 @@
 #include <Eigen/Dense>
 #include <cassert>
 
-namespace util {
+namespace point {
 
-template <typename RandomNumberGenerator>
-class random_variable_sampler {
+class sampler {
  private:
-  RandomNumberGenerator random_number_generator_{};
+  thrust::random::default_random_engine random_number_generator_{};
   thrust::normal_distribution<float> standard_normal_{};
 
  public:
-  using random_number_generator_type = RandomNumberGenerator;
+  using random_number_generator_type = thrust::random::default_random_engine;
 
-  PF_TARGET_ATTRS void seed(const typename RandomNumberGenerator::result_type& seed) noexcept {
+  PF_TARGET_ATTRS void seed(const thrust::random::default_random_engine::result_type& seed) noexcept {
     random_number_generator_.seed(seed);
   }
 
-  PF_TARGET_ATTRS [[nodiscard]] RandomNumberGenerator& random_number_generator() noexcept { return random_number_generator_; }
+  PF_TARGET_ATTRS [[nodiscard]] thrust::random::default_random_engine& random_number_generator() noexcept { return random_number_generator_; }
 
   PF_TARGET_ATTRS [[nodiscard]] float normal_sample(const float& variance) noexcept {
     return sqrt(variance) * standard_normal_(random_number_generator_);
@@ -45,7 +44,5 @@ class random_variable_sampler {
     return -0.5f * x.cwiseProduct(diagonal_covariance.cwiseInverse()).dot(x);
   }
 };
-
-using default_rv_sampler = random_variable_sampler<thrust::random::default_random_engine>;
 
 }  // namespace util

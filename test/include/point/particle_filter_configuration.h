@@ -5,8 +5,8 @@
 #include <point/observation.h>
 #include <point/particle_filter_configuration_parameters.h>
 #include <point/prediction.h>
+#include <point/sampler.h>
 #include <thrust/random.h>
-#include <util/random_variable_sampler.h>
 
 #include <Eigen/Dense>
 
@@ -39,27 +39,27 @@ class particle_filter_configuration {
   using observation_type = observation;
   using prediction_type = prediction;
 
-  using sampler_type = util::default_rv_sampler;
+  using sampler_type = sampler;
 
   [[nodiscard]] most_likely_particle_reduction_impl most_likely_particle_reduction() const noexcept {
     return most_likely_particle_reduction_impl{};
   }
 
   PF_TARGET_ATTRS [[nodiscard]] float conditional_log_likelihood(
-      const util::default_rv_sampler& sampler,
+      const sampler& sampler,
       const observation& state,
       const prediction& given) const noexcept {
     const Eigen::Vector3f error = state.position() - given.position();
     return sampler.unnormalized_normal_log_density(state.position_diagonal_covariance(), error);
   }
 
-  PF_TARGET_ATTRS prediction sample_from(util::default_rv_sampler& sampler, const observation& state) const noexcept {
+  PF_TARGET_ATTRS prediction sample_from(sampler& sampler, const observation& state) const noexcept {
     const auto position_noise = sampler.normal_sample(state.position_diagonal_covariance());
     const auto velocity_noise = sampler.normal_sample(velocity_prior_diagonal_covariance_);
     return prediction(state.position() + position_noise, velocity_noise);
   }
 
-  PF_TARGET_ATTRS void apply_process(const float& time_offset_seconds, util::default_rv_sampler& sampler, prediction& state)
+  PF_TARGET_ATTRS void apply_process(const float& time_offset_seconds, sampler& sampler, prediction& state)
       const noexcept {
     const auto noise_0 = sampler.normal_sample(velocity_process_diagonal_covariance_);
     const auto noise_1 = sampler.normal_sample(velocity_process_diagonal_covariance_);

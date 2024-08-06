@@ -8,7 +8,6 @@
 #include <thrust/random.h>
 #include <thrust/transform_reduce.h>
 #include <thrust/tuple.h>
-#include <util/random_variable_sampler.h>
 
 #include <algorithm>
 #include <utility>
