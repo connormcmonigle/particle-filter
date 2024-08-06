@@ -1,11 +1,11 @@
 #pragma once
 
-#include <config/target_config.h>
+#include <pf/config/target_config.h>
 
 #include <cstddef>
 #include <cstdint>
 
-namespace filter {
+namespace pf::filter {
 
 template <typename T>
 struct particle_reduction_state {
@@ -31,4 +31,4 @@ struct particle_reduction_state_transform {
   }
 };
 
-}  // namespace filter
+}  // namespace pf::filter

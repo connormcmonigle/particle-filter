@@ -1,14 +1,12 @@
 #pragma once
 
-#include <filter/concepts/observation.h>
-#include <filter/concepts/prediction.h>
-#include <filter/particle_reduction_state.h>
+#include <pf/filter/concepts/observation.h>
+#include <pf/filter/concepts/prediction.h>
+#include <pf/filter/particle_reduction_state.h>
 
 #include <concepts>
 
-namespace filter {
-
-namespace concepts {
+namespace pf::filter::concepts {
 
 template <typename T, typename P>
 concept particle_reduction_operation =
@@ -17,6 +15,4 @@ concept particle_reduction_operation =
       { op(a, b) } -> std::same_as<particle_reduction_state<P>>;
     };
 
-}  // namespace concepts
-
-}  // namespace filter
+}  // namespace pf::filter::concepts

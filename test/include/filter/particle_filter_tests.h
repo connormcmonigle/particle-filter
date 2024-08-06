@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <filter/concepts/particle_filter_configuration.h>
-#include <filter/particle_filter.h>
+#include <pf/filter/concepts/particle_filter_configuration.h>
+#include <pf/filter/particle_filter.h>
 #include <point/observation.h>
 #include <point/particle_filter_configuration.h>
 #include <point/particle_filter_configuration_parameters.h>
@@ -36,7 +36,7 @@ boost::ut::suite<"particle_filter"> particle_filter_tests = [] {
         auto ground_truth = point::prediction(initial_position, velocity);
         auto observation = point::observation(ground_truth.position(), observation_covariance);
 
-        auto filter = filter::particle_filter<point::particle_filter_configuration>(number_of_particles, observation, params);
+        auto filter = pf::filter::particle_filter<point::particle_filter_configuration>(number_of_particles, observation, params);
 
         for (std::size_t i(0); i < number_of_update_steps; ++i) {
           ground_truth = ground_truth.extrapolate_state(dt);

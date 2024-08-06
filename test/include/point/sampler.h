@@ -1,6 +1,6 @@
 #pragma once
 
-#include <config/target_config.h>
+#include <pf/config/target_config.h>
 #include <thrust/random.h>
 
 #include <Eigen/Dense>
@@ -20,7 +20,9 @@ class sampler {
     random_number_generator_.seed(seed);
   }
 
-  PF_TARGET_ATTRS [[nodiscard]] thrust::random::default_random_engine& random_number_generator() noexcept { return random_number_generator_; }
+  PF_TARGET_ATTRS [[nodiscard]] thrust::random::default_random_engine& random_number_generator() noexcept {
+    return random_number_generator_;
+  }
 
   PF_TARGET_ATTRS [[nodiscard]] float normal_sample(const float& variance) noexcept {
     return sqrt(variance) * standard_normal_(random_number_generator_);
@@ -45,4 +47,4 @@ class sampler {
   }
 };
 
-}  // namespace util
+}  // namespace point

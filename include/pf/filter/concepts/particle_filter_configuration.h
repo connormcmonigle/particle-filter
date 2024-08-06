@@ -1,15 +1,13 @@
 #pragma once
 
-#include <filter/concepts/observation.h>
-#include <filter/concepts/particle_reduction_operation.h>
-#include <filter/concepts/prediction.h>
-#include <filter/concepts/sampler.h>
+#include <pf/filter/concepts/observation.h>
+#include <pf/filter/concepts/particle_reduction_operation.h>
+#include <pf/filter/concepts/prediction.h>
+#include <pf/filter/concepts/sampler.h>
 
 #include <concepts>
 
-namespace filter {
-
-namespace concepts {
+namespace pf::filter::concepts {
 
 template <typename T>
 concept particle_filter_configuration = requires(
@@ -28,6 +26,4 @@ concept particle_filter_configuration = requires(
   { c.most_likely_particle_reduction() } -> particle_reduction_operation<typename T::prediction_type>;
 };
 
-}  // namespace concepts
-
-}  // namespace filter
+}  // namespace pf::filter::concepts

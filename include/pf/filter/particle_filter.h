@@ -1,9 +1,9 @@
 #pragma once
 
-#include <config/target_config.h>
-#include <filter/concepts/particle_filter_configuration.h>
-#include <filter/particle_reduction_state.h>
-#include <filter/systematic_resampler.h>
+#include <pf/config/target_config.h>
+#include <pf/filter/concepts/particle_filter_configuration.h>
+#include <pf/filter/particle_reduction_state.h>
+#include <pf/filter/systematic_resampler.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/random.h>
 #include <thrust/transform_reduce.h>
@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace filter {
+namespace pf::filter {
 
 template <typename ParticleFilterConfiguration>
   requires concepts::particle_filter_configuration<ParticleFilterConfiguration>
@@ -128,4 +128,4 @@ class particle_filter {
   }
 };
 
-}  // namespace filter
+}  // namespace pf::filter

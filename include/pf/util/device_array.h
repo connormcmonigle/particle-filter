@@ -1,6 +1,6 @@
 #pragma once
 
-#include <config/target_config.h>
+#include <pf/config/target_config.h>
 
 #include <algorithm>
 #include <array>
@@ -8,7 +8,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace util {
+namespace pf::util {
 
 template <typename T, std::size_t N>
 struct device_array {
@@ -105,7 +105,7 @@ struct device_array {
   }
 };
 
-}  // namespace util
+}  // namespace pf::util
 
 namespace std {
 

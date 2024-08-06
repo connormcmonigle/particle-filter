@@ -2,13 +2,9 @@
 
 #include <concepts>
 
-namespace filter {
-
-namespace concepts {
+namespace pf::filter::concepts {
 
 template <typename T>
 concept observation = true;
 
 }
-
-}  // namespace filter

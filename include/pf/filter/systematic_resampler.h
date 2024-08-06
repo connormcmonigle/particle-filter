@@ -1,6 +1,6 @@
 #pragma once
 
-#include <config/target_config.h>
+#include <pf/config/target_config.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
@@ -16,7 +16,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace filter {
+namespace pf::filter {
 
 template <typename T>
   requires std::unsigned_integral<T>
@@ -162,4 +162,4 @@ class systematic_resampler {
   }
 };
 
-}  // namespace filter
+}  // namespace pf::filter

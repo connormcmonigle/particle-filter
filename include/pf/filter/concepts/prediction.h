@@ -2,9 +2,7 @@
 
 #include <concepts>
 
-namespace filter {
-
-namespace concepts {
+namespace pf::filter::concepts {
 
 template <typename T>
 concept prediction = requires(const T p, const float t) {
@@ -12,6 +10,4 @@ concept prediction = requires(const T p, const float t) {
   { p.extrapolate_state(t) } -> std::same_as<T>;
 };
 
-}  // namespace concepts
-
-}  // namespace filter
+}  // namespace pf::filter::concepts
