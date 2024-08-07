@@ -110,10 +110,10 @@ struct device_array {
 namespace std {
 
 template <typename T, size_t N>
-struct tuple_size<util::device_array<T, N>> : std::integral_constant<size_t, N> {};
+struct tuple_size<pf::util::device_array<T, N>> : std::integral_constant<size_t, N> {};
 
 template <size_t Index, typename T, size_t N>
-struct tuple_element<Index, util::device_array<T, N>> {
+struct tuple_element<Index, pf::util::device_array<T, N>> {
   using type = T;
 };
 
