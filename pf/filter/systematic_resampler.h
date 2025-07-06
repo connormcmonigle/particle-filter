@@ -102,7 +102,11 @@ class systematic_resampler {
       const target_config::vector<weight_type>& log_weights,
       target_config::vector<T>& particles) noexcept {
     const weight_type maximum_log_weight = thrust::reduce(
-        log_weights.cbegin(), log_weights.cend(), -std::numeric_limits<weight_type>::infinity(), thrust::maximum<weight_type>());
+        execution_policy,
+        log_weights.cbegin(),
+        log_weights.cend(),
+        -std::numeric_limits<weight_type>::infinity(),
+        thrust::maximum<weight_type>());
 
     thrust::transform(
         execution_policy,
