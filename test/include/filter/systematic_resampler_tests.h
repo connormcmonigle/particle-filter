@@ -30,7 +30,7 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
     const pf::target_config::vector<float> log_weights = of<float>(0.0f);
     pf::target_config::vector<int> particles = of<int>(42);
 
-    resampler.resample(log_weights, particles);
+    resampler.resample(pf::target_config::policy, log_weights, particles);
 
     expect(1_ul == particles.size());
     expect(42_i == *particles.begin());
@@ -42,7 +42,7 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
     const pf::target_config::vector<float> log_weights = of<float>(n_inf, n_inf, n_inf, n_inf, 0.0f);
     pf::target_config::vector<int> particles = of<int>(1, 3, 5, 7, 11);
 
-    resampler.resample(log_weights, particles);
+    resampler.resample(pf::target_config::policy, log_weights, particles);
 
     expect(5_ul == particles.size());
     std::for_each(particles.begin(), particles.end(), [&](const auto& particle) { expect(11_i == particle); });
@@ -54,7 +54,7 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
     const pf::target_config::vector<float> log_weights = of<float>(0.0f, n_inf, n_inf, n_inf, n_inf);
     pf::target_config::vector<int> particles = of<int>(1, 3, 5, 7, 11);
 
-    resampler.resample(log_weights, particles);
+    resampler.resample(pf::target_config::policy, log_weights, particles);
 
     expect(5_ul == particles.size());
     std::for_each(particles.begin(), particles.end(), [&](const auto& particle) { expect(1_i == particle); });
@@ -66,7 +66,7 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
     const pf::target_config::vector<float> log_weights = of<float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     pf::target_config::vector<int> particles = of<int>(1, 3, 5, 7, 11);
 
-    resampler.resample(log_weights, particles);
+    resampler.resample(pf::target_config::policy, log_weights, particles);
 
     const pf::target_config::vector<int> expected = of<int>(1, 3, 5, 7, 11);
     expect(expected == particles);
@@ -78,7 +78,7 @@ boost::ut::suite<"systematic_resampler"> systematic_resampler_tests = [] {
     const pf::target_config::vector<float> log_weights = of<float>(n_inf, n_inf, std::log(1.0f), std::log(2.0f), std::log(2.0f));
     pf::target_config::vector<int> particles = of<int>(1, 3, 5, 7, 11);
 
-    resampler.resample(log_weights, particles);
+    resampler.resample(pf::target_config::policy, log_weights, particles);
 
     const pf::target_config::vector<int> expected = of<int>(5, 7, 7, 11, 11);
     expect(expected == particles);

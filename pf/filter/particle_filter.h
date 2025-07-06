@@ -5,6 +5,10 @@
 #include <pf/filter/particle_reduction_state.h>
 #include <pf/filter/systematic_resampler.h>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/mr/allocator.h>
+#include <thrust/mr/device_memory_resource.h>
+#include <thrust/mr/disjoint_tls_pool.h>
+#include <thrust/mr/new.h>
 #include <thrust/random.h>
 #include <thrust/transform_reduce.h>
 #include <thrust/tuple.h>
@@ -13,6 +17,21 @@
 #include <utility>
 
 namespace pf::filter {
+
+namespace helper {
+
+using disjoint_pool_resource_type =
+    thrust::mr::disjoint_unsynchronized_pool_resource<thrust::device_memory_resource, thrust::mr::new_delete_resource>;
+
+using caching_allocator_type = thrust::mr::allocator<char, helper::disjoint_pool_resource_type>;
+
+inline caching_allocator_type thread_local_caching_allocator() {
+  return {&thrust::mr::tls_disjoint_pool(
+      thrust::mr::get_global_resource<thrust::device_memory_resource>(),
+      thrust::mr::get_global_resource<thrust::mr::new_delete_resource>())};
+}
+
+}  // namespace helper
 
 template <typename ParticleFilterConfiguration>
   requires concepts::particle_filter_configuration<ParticleFilterConfiguration>
@@ -24,6 +43,7 @@ class particle_filter {
   using prediction_type = typename ParticleFilterConfiguration::prediction_type;
   using sampler_type = typename ParticleFilterConfiguration::sampler_type;
 
+  helper::caching_allocator_type caching_allocator_;
   ParticleFilterConfiguration config_;
 
   prediction_type most_likely_particle_state_;
@@ -40,7 +60,7 @@ class particle_filter {
 
   void update_state_sans_observation(const float& time_offset_seconds) noexcept {
     thrust::for_each(
-        target_config::policy,
+        target_config::policy(caching_allocator_),
         thrust::make_zip_iterator(sampler_states_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds] PF_TARGET_ONLY_ATTRS(thrust::tuple<sampler_type&, prediction_type&> tuple) {
@@ -50,7 +70,7 @@ class particle_filter {
         });
 
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      target_config::policy,
+                                      target_config::policy(caching_allocator_),
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),
@@ -61,7 +81,7 @@ class particle_filter {
 
   void update_state_with_observation(const float& time_offset_seconds, const observation_type& observation_state) noexcept {
     thrust::for_each(
-        target_config::policy,
+        target_config::policy(caching_allocator_),
         thrust::make_zip_iterator(sampler_states_.begin(), log_particle_weights_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), log_particle_weights_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds, observation_state] PF_TARGET_ONLY_ATTRS(
@@ -74,9 +94,9 @@ class particle_filter {
           particle_weight = config.conditional_log_likelihood(sampler_state, observation_state, particle_state);
         });
 
-    resampler_.resample(log_particle_weights_, particle_states_);
+    resampler_.resample(target_config::policy(caching_allocator_), log_particle_weights_, particle_states_);
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      target_config::policy,
+                                      target_config::policy(caching_allocator_),
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),
@@ -89,7 +109,7 @@ class particle_filter {
     thrust::counting_iterator<std::size_t> index_sequence_begin(std::size_t{});
 
     thrust::for_each(
-        target_config::policy,
+        target_config::policy(caching_allocator_),
         thrust::make_zip_iterator(index_sequence_begin, sampler_states_.begin()),
         thrust::make_zip_iterator(index_sequence_begin + number_of_particles, sampler_states_.end()),
         [number_of_particles] PF_TARGET_ATTRS(thrust::tuple<std::size_t, sampler_type&> tuple) {
@@ -99,7 +119,7 @@ class particle_filter {
         });
 
     thrust::transform(
-        target_config::policy,
+        target_config::policy(caching_allocator_),
         sampler_states_.begin(),
         sampler_states_.end(),
         particle_states_.begin(),
@@ -108,7 +128,7 @@ class particle_filter {
         });
 
     most_likely_particle_state_ = thrust::transform_reduce(
-                                      target_config::policy,
+                                      target_config::policy(caching_allocator_),
                                       particle_states_.cbegin(),
                                       particle_states_.cend(),
                                       particle_reduction_state_transform<prediction_type>(),
@@ -119,7 +139,8 @@ class particle_filter {
 
   template <typename... Ts>
   particle_filter(const std::size_t& number_of_particles, const observation_type& initial_observation, Ts&&... params) noexcept
-      : config_(std::forward<Ts>(params)...),
+      : caching_allocator_{helper::thread_local_caching_allocator()},
+        config_(std::forward<Ts>(params)...),
         resampler_(number_of_particles),
         sampler_states_(number_of_particles),
         log_particle_weights_(number_of_particles),

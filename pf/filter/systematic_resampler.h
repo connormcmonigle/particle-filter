@@ -96,24 +96,28 @@ class systematic_resampler {
   target_config::vector<truncated_representation_type> particle_scatter_indices_;
 
  public:
-  void resample(const target_config::vector<weight_type>& log_weights, target_config::vector<T>& particles) noexcept {
+  template <typename ExecutionPolicy>
+  void resample(
+      const ExecutionPolicy& execution_policy,
+      const target_config::vector<weight_type>& log_weights,
+      target_config::vector<T>& particles) noexcept {
     const weight_type maximum_log_weight = thrust::reduce(
         log_weights.cbegin(), log_weights.cend(), -std::numeric_limits<weight_type>::infinity(), thrust::maximum<weight_type>());
 
     thrust::transform(
-        target_config::policy,
+        execution_policy,
         log_weights.cbegin(),
         log_weights.cend(),
         particle_weights_.begin(),
         [maximum_log_weight] PF_TARGET_ATTRS(const weight_type& log_weight) { return expf(log_weight - maximum_log_weight); });
 
     const weight_type cumulative_particle_weight =
-        thrust::reduce(target_config::policy, particle_weights_.cbegin(), particle_weights_.cend());
+        thrust::reduce(execution_policy, particle_weights_.cbegin(), particle_weights_.cend());
 
     const weight_type index_scale = static_cast<weight_type>(number_of_particles_) / cumulative_particle_weight;
 
     thrust::transform_exclusive_scan(
-        target_config::policy,
+        execution_policy,
         particle_weights_.cbegin(),
         particle_weights_.cend(),
         particle_scatter_indices_.begin(),
@@ -121,13 +125,13 @@ class systematic_resampler {
         truncated_representation_type::zero(),
         truncated_representation_bounded_plus<index_type>(number_of_particles_));
 
-    thrust::fill(target_config::policy, temp_particle_indices_.begin(), temp_particle_indices_.end(), index_type{});
+    thrust::fill(execution_policy, temp_particle_indices_.begin(), temp_particle_indices_.end(), index_type{});
 
     const auto one = static_cast<index_type>(1);
     const auto input_index_iterator = thrust::make_counting_iterator<index_type>(index_type{});
 
     thrust::scatter_if(
-        target_config::policy,
+        execution_policy,
         thrust::make_zip_iterator(input_index_iterator + one, particles.cbegin()),
         thrust::make_zip_iterator(input_index_iterator + number_of_particles_ + one, particles.cend()),
         thrust::make_transform_iterator(
@@ -140,7 +144,7 @@ class systematic_resampler {
         });
 
     thrust::inclusive_scan(
-        target_config::policy,
+        execution_policy,
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
         thrust::make_zip_iterator(temp_particle_indices_.end(), temp_particles_.end()),
         thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
