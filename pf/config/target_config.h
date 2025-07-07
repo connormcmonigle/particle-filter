@@ -10,7 +10,7 @@
 
 namespace pf::target_config {
 
-static constexpr auto& policy = thrust::cuda::par;
+static constexpr auto& policy = thrust::cuda::par_nosync;
 
 template <typename T>
 using vector = thrust::cuda::vector<T>;

@@ -20,8 +20,8 @@ boost::ut::suite<"particle_filter"> particle_filter_tests = [] {
   constexpr float dt = 0.15f;
   constexpr float precision = 0.05f;
 
-  constexpr std::size_t number_of_particles = 1u << 16;
-  constexpr std::size_t number_of_update_steps = 8u;
+  constexpr std::size_t number_of_particles = 32u << 20;
+  constexpr std::size_t number_of_update_steps = 128u;
 
   const auto params = point::particle_filter_configuration_parameters{
       .velocity_prior_diagonal_covariance = (Eigen::Vector3f{} << 4.0f, 4.0f, 4.0f).finished(),
