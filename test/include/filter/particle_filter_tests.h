@@ -20,8 +20,8 @@ boost::ut::suite<"particle_filter"> particle_filter_tests = [] {
   constexpr float dt = 0.15f;
   constexpr float precision = 0.05f;
 
-  constexpr std::size_t number_of_particles = 32u << 20;
-  constexpr std::size_t number_of_update_steps = 128u;
+  constexpr std::size_t number_of_particles = 1u << 16;
+  constexpr std::size_t number_of_update_steps = 8u;
 
   const auto params = point::particle_filter_configuration_parameters{
       .velocity_prior_diagonal_covariance = (Eigen::Vector3f{} << 4.0f, 4.0f, 4.0f).finished(),
@@ -70,4 +70,28 @@ boost::ut::suite<"particle_filter"> particle_filter_tests = [] {
           (Eigen::Vector3f{} << 2.0f, -3.0f, 0.0f).finished(),
           (Eigen::Vector3f{} << -5.0f, -5.0f, -5.0f).finished(),
       };
+
+  boost::ut::tag("benchmark") / "performance particle filter test"_test = [&]() {
+    constexpr std::size_t benchmark_number_of_particles = 1u << 20;
+    constexpr std::size_t benchmark_number_of_update_steps = 32768u;
+
+    const auto initial_velocity = (Eigen::Vector3f{} << 0.5f, 0.5f, 0.5f).finished();
+
+    float elapsed_time_seconds = 0.0f;
+    auto ground_truth = point::prediction(initial_position, initial_velocity);
+    auto observation = point::observation(ground_truth.position(), observation_covariance);
+
+    auto filter =
+        pf::filter::particle_filter<point::particle_filter_configuration>(benchmark_number_of_particles, observation, params);
+
+    for (std::size_t i(0); i < benchmark_number_of_update_steps; ++i) {
+      ground_truth = point::prediction(ground_truth.position(), std::cos(elapsed_time_seconds) * initial_velocity);
+      ground_truth = ground_truth.extrapolate_state(dt);
+
+      observation = point::observation(ground_truth.position(), observation_covariance);
+      filter.update_state_with_observation(dt, observation);
+
+      elapsed_time_seconds += dt;
+    }
+  };
 };
