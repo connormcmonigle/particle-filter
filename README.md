@@ -151,7 +151,7 @@ particle_filter::particle_filter(
 
 # Tests
 
-The provided test suite can be compile and run with the following commands:
+The provided test suite can be compiled and run with the following commands:
 
 ```bash
 git submodule update --init --recursive # only required if you're running unit tests.
