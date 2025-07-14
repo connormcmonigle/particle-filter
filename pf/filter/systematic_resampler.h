@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pf/config/target_config.h>
+#include <thrust/gather.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
@@ -130,31 +131,34 @@ class systematic_resampler {
         truncated_representation_bounded_plus<index_type>(number_of_particles_));
 
     thrust::fill(execution_policy, temp_particle_indices_.begin(), temp_particle_indices_.end(), index_type{});
-
-    const auto one = static_cast<index_type>(1);
     const auto input_index_iterator = thrust::make_counting_iterator<index_type>(index_type{});
 
     thrust::scatter_if(
         execution_policy,
-        thrust::make_zip_iterator(input_index_iterator + one, particles.cbegin()),
-        thrust::make_zip_iterator(input_index_iterator + number_of_particles_ + one, particles.cend()),
+        input_index_iterator,
+        input_index_iterator + number_of_particles_,
         thrust::make_transform_iterator(
             particle_scatter_indices_.cbegin(),
             [] PF_TARGET_ATTRS(const truncated_representation_type& index) { return index.integral_component(); }),
         thrust::make_zip_iterator(particle_scatter_indices_.cbegin(), std::next(particle_scatter_indices_.cbegin())),
-        thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
+        temp_particle_indices_.begin(),
         [] PF_TARGET_ATTRS(const thrust::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
           return thrust::get<1>(tuple).integral_component() > thrust::get<0>(tuple).integral_component();
         });
 
     thrust::inclusive_scan(
         execution_policy,
-        thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
-        thrust::make_zip_iterator(temp_particle_indices_.end(), temp_particles_.end()),
-        thrust::make_zip_iterator(temp_particle_indices_.begin(), temp_particles_.begin()),
-        [] PF_TARGET_ATTRS(const thrust::tuple<index_type, particle_type>& a, const thrust::tuple<index_type, particle_type>& b) {
-          return (thrust::get<0>(a) > thrust::get<0>(b)) ? a : b;
-        });
+        temp_particle_indices_.cbegin(),
+        temp_particle_indices_.cend(),
+        temp_particle_indices_.begin(),
+        thrust::maximum<index_type>());
+
+    thrust::gather(
+        execution_policy,
+        temp_particle_indices_.cbegin(),
+        temp_particle_indices_.cend(),
+        particles.cbegin(),
+        temp_particles_.begin());
 
     temp_particles_.swap(particles);
   }
