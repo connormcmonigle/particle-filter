@@ -9,11 +9,11 @@
 #include <thrust/scan.h>
 #include <thrust/scatter.h>
 #include <thrust/transform_scan.h>
-#include <thrust/tuple.h>
 
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <cuda/std/tuple>
 #include <limits>
 #include <type_traits>
 
@@ -142,8 +142,8 @@ class systematic_resampler {
             [] PF_TARGET_ATTRS(const truncated_representation_type& index) { return index.integral_component(); }),
         thrust::make_zip_iterator(particle_scatter_indices_.cbegin(), std::next(particle_scatter_indices_.cbegin())),
         temp_particle_indices_.begin(),
-        [] PF_TARGET_ATTRS(const thrust::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
-          return thrust::get<1>(tuple).integral_component() > thrust::get<0>(tuple).integral_component();
+        [] PF_TARGET_ATTRS(const cuda::std::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
+          return cuda::std::get<1>(tuple).integral_component() > cuda::std::get<0>(tuple).integral_component();
         });
 
     thrust::inclusive_scan(

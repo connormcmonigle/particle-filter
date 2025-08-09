@@ -11,9 +11,9 @@
 #include <thrust/mr/new.h>
 #include <thrust/random.h>
 #include <thrust/transform_reduce.h>
-#include <thrust/tuple.h>
 
 #include <algorithm>
+#include <cuda/std/tuple>
 #include <utility>
 
 namespace pf::filter {
@@ -63,9 +63,9 @@ class particle_filter {
         target_config::policy(caching_allocator_),
         thrust::make_zip_iterator(sampler_states_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), particle_states_.end()),
-        [config = config_, time_offset_seconds] PF_TARGET_ONLY_ATTRS(thrust::tuple<sampler_type&, prediction_type&> tuple) {
-          sampler_type& sampler_state = thrust::get<0>(tuple);
-          prediction_type& particle_state = thrust::get<1>(tuple);
+        [config = config_, time_offset_seconds] PF_TARGET_ONLY_ATTRS(cuda::std::tuple<sampler_type&, prediction_type&> tuple) {
+          sampler_type& sampler_state = cuda::std::get<0>(tuple);
+          prediction_type& particle_state = cuda::std::get<1>(tuple);
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
         });
 
@@ -85,10 +85,10 @@ class particle_filter {
         thrust::make_zip_iterator(sampler_states_.begin(), log_particle_weights_.begin(), particle_states_.begin()),
         thrust::make_zip_iterator(sampler_states_.end(), log_particle_weights_.end(), particle_states_.end()),
         [config = config_, time_offset_seconds, observation_state] PF_TARGET_ONLY_ATTRS(
-            thrust::tuple<sampler_type&, float&, prediction_type&> tuple) {
-          sampler_type& sampler_state = thrust::get<0>(tuple);
-          float& particle_weight = thrust::get<1>(tuple);
-          prediction_type& particle_state = thrust::get<2>(tuple);
+            cuda::std::tuple<sampler_type&, float&, prediction_type&> tuple) {
+          sampler_type& sampler_state = cuda::std::get<0>(tuple);
+          float& particle_weight = cuda::std::get<1>(tuple);
+          prediction_type& particle_state = cuda::std::get<2>(tuple);
 
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
           particle_weight = config.conditional_log_likelihood(sampler_state, observation_state, particle_state);
@@ -112,10 +112,10 @@ class particle_filter {
         target_config::policy(caching_allocator_),
         thrust::make_zip_iterator(index_sequence_begin, sampler_states_.begin()),
         thrust::make_zip_iterator(index_sequence_begin + number_of_particles, sampler_states_.end()),
-        [number_of_particles] PF_TARGET_ATTRS(thrust::tuple<std::size_t, sampler_type&> tuple) {
+        [number_of_particles] PF_TARGET_ATTRS(cuda::std::tuple<std::size_t, sampler_type&> tuple) {
           thrust::default_random_engine generator{};
-          generator.discard(thrust::get<0>(tuple));
-          thrust::get<1>(tuple).seed(generator());
+          generator.discard(cuda::std::get<0>(tuple));
+          cuda::std::get<1>(tuple).seed(generator());
         });
 
     thrust::transform(
