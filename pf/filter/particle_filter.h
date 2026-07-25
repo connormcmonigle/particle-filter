@@ -100,6 +100,7 @@ class particle_filter {
         [config = config_, new_observation] PF_TARGET_ONLY_ATTRS(sampler_type& sampler_state) {
           return config.sample_from(sampler_state, new_observation);
         });
+
     reduce_most_likely_particle_();
   }
 
