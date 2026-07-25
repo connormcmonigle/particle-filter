@@ -79,6 +79,13 @@ struct truncated_representation_bounded_plus {
   constexpr truncated_representation_bounded_plus(const T& bound) noexcept : bound_{bound} {}
 };
 
+struct increasing_integral_component_predicate {
+  template <typename TupleType>
+  PF_TARGET_ATTRS [[nodiscard]] bool operator()(const TupleType& tuple) const noexcept {
+    return thrust::get<1>(tuple).integral_component() > thrust::get<0>(tuple).integral_component();
+  }
+};
+
 template <typename T, typename I>
   requires std::unsigned_integral<I>
 class systematic_resampler {
@@ -142,9 +149,7 @@ class systematic_resampler {
             [] PF_TARGET_ATTRS(const truncated_representation_type& index) { return index.integral_component(); }),
         thrust::make_zip_iterator(particle_scatter_indices_.cbegin(), std::next(particle_scatter_indices_.cbegin())),
         temp_particle_indices_.begin(),
-        [] PF_TARGET_ATTRS(const cuda::std::tuple<truncated_representation_type, truncated_representation_type>& tuple) {
-          return cuda::std::get<1>(tuple).integral_component() > cuda::std::get<0>(tuple).integral_component();
-        });
+        increasing_integral_component_predicate{});
 
     thrust::inclusive_scan(
         execution_policy,

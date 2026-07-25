@@ -69,14 +69,7 @@ class particle_filter {
           config.apply_process(time_offset_seconds, sampler_state, particle_state);
         });
 
-    most_likely_particle_state_ = thrust::transform_reduce(
-                                      target_config::policy(caching_allocator_),
-                                      particle_states_.cbegin(),
-                                      particle_states_.cend(),
-                                      particle_reduction_state_transform<prediction_type>(),
-                                      particle_reduction_state<prediction_type>::zero(),
-                                      config_.most_likely_particle_reduction())
-                                      .most_likely_particle();
+    reduce_most_likely_particle_();
   }
 
   void update_state_with_observation(const float& time_offset_seconds, const observation_type& observation_state) noexcept {
@@ -95,14 +88,20 @@ class particle_filter {
         });
 
     resampler_.resample(target_config::policy(caching_allocator_), log_particle_weights_, particle_states_);
-    most_likely_particle_state_ = thrust::transform_reduce(
-                                      target_config::policy(caching_allocator_),
-                                      particle_states_.cbegin(),
-                                      particle_states_.cend(),
-                                      particle_reduction_state_transform<prediction_type>(),
-                                      particle_reduction_state<prediction_type>::zero(),
-                                      config_.most_likely_particle_reduction())
-                                      .most_likely_particle();
+    reduce_most_likely_particle_();
+  }
+
+  void reinitialize(const observation_type& new_observation) noexcept {
+    thrust::transform(
+        target_config::policy(caching_allocator_),
+        sampler_states_.begin(),
+        sampler_states_.end(),
+        particle_states_.begin(),
+        [config = config_, new_observation] PF_TARGET_ONLY_ATTRS(sampler_type& sampler_state) {
+          return config.sample_from(sampler_state, new_observation);
+        });
+
+    reduce_most_likely_particle_();
   }
 
   void initialize_internal_state_(const std::size_t& number_of_particles, const observation_type& initial_observation) noexcept {
@@ -127,6 +126,10 @@ class particle_filter {
           return config.sample_from(sampler_state, initial_observation);
         });
 
+    reduce_most_likely_particle_();
+  }
+
+  void reduce_most_likely_particle_() noexcept {
     most_likely_particle_state_ = thrust::transform_reduce(
                                       target_config::policy(caching_allocator_),
                                       particle_states_.cbegin(),
