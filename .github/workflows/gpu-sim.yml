@@ -1,0 +1,59 @@
+name: GPU Simulator
+
+# Builds cuda_tests (the same boost::ut suites as omp_tests, on the Thrust CUDA
+# backend) and runs them on a simulated NVIDIA H100
+# (https://github.com/pantheongpu/pantheonsim). The hosted runners have no GPU.
+# The "benchmark" test (2^20 particles, 32768 steps) is not run, since a
+# simulator cannot reproduce timing anyway.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "pf/**"
+      - "test/**"
+      - "CMakeLists.txt"
+      - ".github/workflows/gpu-sim.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cuda-tests:
+    name: cuda_tests (CUDA 12.6 and simulated H100)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Set up the simulated GPU and CUDA toolkit
+        uses: pantheongpu/setup-pantheonsim@a1b9d4237411f9b2b0e0bb895b4d83377f336a7b # v0.1.9
+        with:
+          gpu: nvidia/h100
+          cuda-toolkit: "12.6"
+
+      # The simulator runs PTX only, so use 90-virtual instead of `native`
+      # (which needs a GPU), and it needs a shared CUDA runtime.
+      - name: Configure
+        run: |
+          sed -i 's/CUDA_ARCHITECTURES native/CUDA_ARCHITECTURES 90-virtual/' CMakeLists.txt
+          # main() enables the benchmark-tagged test; leave it out.
+          sed -i 's/^int main().*/int main() {}/' test/src/main.cu
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.6/bin/nvcc \
+            -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared
+
+      - name: Build
+        run: cmake --build build --target cuda_tests -j3
+
+      - name: Run tests
+        run: vgpu run ./build/cuda_tests
